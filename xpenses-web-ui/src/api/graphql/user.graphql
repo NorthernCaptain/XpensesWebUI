@@ -1,0 +1,7 @@
+query userByToken($userToken: String) {
+    user(token: $userToken) {
+        id
+        short_name
+        group_code
+    }
+}

@@ -10,10 +10,11 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import {useDispatch, useSelector} from "react-redux";
-import {loginAsync, useAuth} from "../features/auth/authSlice";
+import {loginAsync, useAuth, userInfo} from "../features/auth/authSlice";
 import emailValidator from 'email-validator'
 import {Redirect} from "react-router";
 import {useQuery} from "../utils/helpers";
+import {useUserByTokenQuery} from "../generated/graphql";
 
 function Copyright() {
     return (
@@ -60,9 +61,20 @@ export default function SignIn() {
     const auth = useAuth()
     const userError = emailError || loginError;
     const queryParams = useQuery();
+    const {data} = useUserByTokenQuery({
+        variables: {
+            userToken: auth.token,
+        },
+        skip: !auth.valid,
+    })
 
+    if(data && data.user && data.user.id) {
+        dispatch(userInfo(data.user))
+    }
 
-    if(auth.valid) return <Redirect to={queryParams.has("from") ? queryParams.get("from") : "/"} />
+    console.log("DATA: ", data, auth)
+
+    if(auth.valid && auth.groupCode) return <Redirect to={queryParams.has("from") ? queryParams.get("from") : "/"} />
 
     function validate() {
         if(!email) {

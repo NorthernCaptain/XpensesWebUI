@@ -2,28 +2,41 @@ import { createSlice } from '@reduxjs/toolkit'
 import {getUserToken} from "../../api/auth";
 import {useSelector} from "react-redux";
 
-const authStorageKey = "xpense-auth-store";
+const authStorageKey = "xpense-auth-store-4";
 export const authSlice = createSlice({
     name: 'auth',
     initialState: Object.assign({
         token: null,
         token_type: null,
         expires_time_millis: 0,
-        error: null
+        error: null,
+        userId: null,
+        groupCode: null,
+        name: null
     }, JSON.parse(localStorage.getItem(authStorageKey)) || {}),
         reducers: {
         login: (state, action) => {
-            state.access_token = action.payload.access_token;
+            state.token = action.payload.access_token;
             state.token_type = action.payload.token_type;
             state.expires_time_millis = action.payload.expires_time_millis;
             state.error = action.payload.error;
-            localStorage.setItem(authStorageKey, JSON.stringify(action.payload));
+            localStorage.setItem(authStorageKey, JSON.stringify(state));
+        },
+        userInfo: (state, action) => {
+            console.log("userInfo action", action)
+            let data = action.payload
+            if(data.id && data.group_code) {
+                state.userId = data.id
+                state.groupCode = data.group_code
+                state.name = data.short_name
+                localStorage.setItem(authStorageKey, JSON.stringify(state));
+            }
         }
     }
 })
 
 // Action creators are generated for each case reducer function
-export const { login } = authSlice.actions
+export const { login, userInfo } = authSlice.actions
 
 export const loginAsync = loginData => async dispatch => {
     let data = await getUserToken(loginData);
@@ -32,7 +45,7 @@ export const loginAsync = loginData => async dispatch => {
 
 export function useAuth() {
     const auth = useSelector(state => state.auth);
-    const valid = auth.access_token && auth.expires_time_millis
+    const valid = auth.token && auth.expires_time_millis
         && auth.expires_time_millis > Date.now() + 60*1000; // our token doesn't expire in 1 min
     return { valid, ...auth }
 }
