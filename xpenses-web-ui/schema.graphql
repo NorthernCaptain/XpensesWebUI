@@ -77,4 +77,5 @@ type Query {
     smsregexp(id: Int!): SmsRegExp
     smsregexps(user_id: Int): [SmsRegExp]!
     expense(id: Int!): Expense
+    expenses(group_code:Int!, date_from: DateTime!, date_to: DateTime!, typ: Int): [Expense]!
 }

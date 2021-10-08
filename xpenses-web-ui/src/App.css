@@ -1,3 +1,5 @@
+.App .recharts-legend-item { font-size: 0.75rem; }
+
 .App {
   text-align: center;
 }

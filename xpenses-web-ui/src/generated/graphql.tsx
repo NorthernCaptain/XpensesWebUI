@@ -55,6 +55,7 @@ export type Query = {
   smsregexp?: Maybe<SmsRegExp>;
   smsregexps: Array<Maybe<SmsRegExp>>;
   expense?: Maybe<Expense>;
+  expenses: Array<Maybe<Expense>>;
 };
 
 
@@ -86,6 +87,14 @@ export type QuerySmsregexpsArgs = {
 
 export type QueryExpenseArgs = {
   id: Scalars['Int'];
+};
+
+
+export type QueryExpensesArgs = {
+  group_code: Scalars['Int'];
+  date_from: Scalars['DateTime'];
+  date_to: Scalars['DateTime'];
+  typ?: Maybe<Scalars['Int']>;
 };
 
 export type SmsRegExp = {
@@ -130,6 +139,16 @@ export type Wallet = {
   modified?: Maybe<Scalars['DateTime']>;
 };
 
+export type ExpensesForSummaryQueryVariables = Exact<{
+  groupCode: Scalars['Int'];
+  dateFrom: Scalars['DateTime'];
+  dateTo: Scalars['DateTime'];
+  type?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type ExpensesForSummaryQuery = { __typename?: 'Query', expenses: Array<Maybe<{ __typename?: 'Expense', tran_date?: Maybe<any>, amount: number, category?: Maybe<{ __typename?: 'Category', id: number, name?: Maybe<string>, parent?: Maybe<{ __typename?: 'Category', id: number, name?: Maybe<string> }> }> }>> };
+
 export type UserByTokenQueryVariables = Exact<{
   userToken?: Maybe<Scalars['String']>;
 }>;
@@ -138,6 +157,58 @@ export type UserByTokenQueryVariables = Exact<{
 export type UserByTokenQuery = { __typename?: 'Query', user?: Maybe<{ __typename?: 'User', id: number, short_name?: Maybe<string>, group_code?: Maybe<number> }> };
 
 
+export const ExpensesForSummaryDocument = gql`
+    query ExpensesForSummary($groupCode: Int!, $dateFrom: DateTime!, $dateTo: DateTime!, $type: Int) {
+  expenses(
+    group_code: $groupCode
+    date_from: $dateFrom
+    date_to: $dateTo
+    typ: $type
+  ) {
+    tran_date
+    amount
+    category {
+      id
+      parent {
+        id
+        name
+      }
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useExpensesForSummaryQuery__
+ *
+ * To run a query within a React component, call `useExpensesForSummaryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useExpensesForSummaryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useExpensesForSummaryQuery({
+ *   variables: {
+ *      groupCode: // value for 'groupCode'
+ *      dateFrom: // value for 'dateFrom'
+ *      dateTo: // value for 'dateTo'
+ *      type: // value for 'type'
+ *   },
+ * });
+ */
+export function useExpensesForSummaryQuery(baseOptions: Apollo.QueryHookOptions<ExpensesForSummaryQuery, ExpensesForSummaryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ExpensesForSummaryQuery, ExpensesForSummaryQueryVariables>(ExpensesForSummaryDocument, options);
+      }
+export function useExpensesForSummaryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ExpensesForSummaryQuery, ExpensesForSummaryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ExpensesForSummaryQuery, ExpensesForSummaryQueryVariables>(ExpensesForSummaryDocument, options);
+        }
+export type ExpensesForSummaryQueryHookResult = ReturnType<typeof useExpensesForSummaryQuery>;
+export type ExpensesForSummaryLazyQueryHookResult = ReturnType<typeof useExpensesForSummaryLazyQuery>;
+export type ExpensesForSummaryQueryResult = Apollo.QueryResult<ExpensesForSummaryQuery, ExpensesForSummaryQueryVariables>;
 export const UserByTokenDocument = gql`
     query userByToken($userToken: String) {
   user(token: $userToken) {

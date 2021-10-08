@@ -1,0 +1,14 @@
+query ExpensesForSummary($groupCode: Int!, $dateFrom: DateTime!, $dateTo: DateTime!, $type: Int) {
+    expenses(group_code: $groupCode, date_from: $dateFrom, date_to: $dateTo, typ: $type) {
+        tran_date
+        amount
+        category {
+            id
+            parent {
+                id
+                name
+            }
+            name
+        }
+    }
+}

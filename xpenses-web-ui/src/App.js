@@ -1,3 +1,6 @@
+/**
+ * Copyright 2021, Northern Captain
+ */
 import React, { lazy, Suspense } from 'react';
 import {Route} from "react-router";
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'

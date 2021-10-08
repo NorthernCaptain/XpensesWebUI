@@ -22,6 +22,13 @@ export const authSlice = createSlice({
             state.error = action.payload.error;
             localStorage.setItem(authStorageKey, JSON.stringify(state));
         },
+        logout: (state, action) => {
+            state.token = null;
+            state.token_type = null;
+            state.expires_time_millis = 0;
+            state.error = null;
+            localStorage.setItem(authStorageKey, JSON.stringify(state));
+        },
         userInfo: (state, action) => {
             console.log("userInfo action", action)
             let data = action.payload
@@ -29,6 +36,7 @@ export const authSlice = createSlice({
                 state.userId = data.id
                 state.groupCode = data.group_code
                 state.name = data.short_name
+                state.abbr = data.short_name ? data.short_name[0].toUpperCase() : '?'
                 localStorage.setItem(authStorageKey, JSON.stringify(state));
             }
         }
@@ -36,7 +44,7 @@ export const authSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { login, userInfo } = authSlice.actions
+export const { login, userInfo, logout } = authSlice.actions
 
 export const loginAsync = loginData => async dispatch => {
     let data = await getUserToken(loginData);
