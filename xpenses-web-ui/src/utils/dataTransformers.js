@@ -74,12 +74,12 @@ export function groupByTopCategoryAndYear(items, labels) {
     })
 
     //compress the tail
-    if(data.length > 9) {
+    if(data.length > 11) {
         const tail = { name: "Other", shortName: "Oth" }
         for(let lbl of labels) {
             tail[lbl.name] = 0
         }
-        while(data.length > 9) {
+        while(data.length > 11) {
             const item = data.pop();
             for(let lbl of labels) {
                 tail[lbl.name] += (item[lbl.name] ? item[lbl.name] : 0)
@@ -89,4 +89,16 @@ export function groupByTopCategoryAndYear(items, labels) {
     }
 
     return {data: data, labels: labels}
+}
+
+export function filterExpensesByCategories(data, categories) {
+    let cache = {}
+    for(let item of categories) cache[item.id] = true
+    let ret = []
+    for(let item of data) {
+        if(cache[item.category.id] ||
+            (item.category.parent && cache[item.category.parent.id]))
+            ret.push(item)
+    }
+    return ret
 }

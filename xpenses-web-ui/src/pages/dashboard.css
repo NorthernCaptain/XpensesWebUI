@@ -1,0 +1,6 @@
+
+.monthly-filters .MuiTextField-root.dash-date-picker .MuiInputBase-root {
+    height: 38px;
+    margin-top: 8px;
+    max-width: 270px;
+}

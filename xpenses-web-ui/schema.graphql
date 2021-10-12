@@ -73,7 +73,7 @@ type Query {
     user(id: Int, token: String): User
     wallet(id: Int!): Wallet
     category(id: Int!): Category
-    categories: [Category]!
+    categories(group_code: Int!, typ: Int): [Category]!
     smsregexp(id: Int!): SmsRegExp
     smsregexps(user_id: Int): [SmsRegExp]!
     expense(id: Int!): Expense

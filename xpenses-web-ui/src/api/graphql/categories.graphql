@@ -1,0 +1,11 @@
+query Categories($groupCode: Int!, $typ: Int) {
+    categories(group_code: $groupCode, typ: $typ) {
+        id
+        name
+        parent_id
+        parent {
+            id
+            name
+        }
+    }
+}
