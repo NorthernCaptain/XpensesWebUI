@@ -159,7 +159,7 @@ export function MonthlyDashboard(props) {
         console.log("GOT DATA", data)
         let filtered = filterExpensesByCategories(data.expenses, categories)
         console.log("FILTERED", filtered)
-        const grouped = groupByTopCategoryAndYear(filtered, [{name: firstMonth.format('YYYY'), color: "#8884d8"}])
+        const grouped = groupByTopCategoryAndYear(filtered, [{name: firstMonth.format('YYYY-MM'), color: "#8884d8"}])
         console.log("GRP", grouped)
         setCatData(grouped)
     }

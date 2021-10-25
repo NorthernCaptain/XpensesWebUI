@@ -1,3 +1,4 @@
+import moment from "moment";
 
 export function groupByMonthYear(items, labels) {
     const months = [
@@ -38,9 +39,10 @@ export function groupByMonthYear(items, labels) {
 
 export function groupByTopCategoryAndYear(items, labels) {
     const cache = {}
+    const keyLen = labels[0].name.length
     for(let item of items) {
         const category = item.category.parent ? item.category.parent : item.category;
-        const year = item.tran_date.substring(0,4)
+        const year = item.tran_date.substring(0,keyLen)
         let cdata = cache[category.id]
         cdata = cdata ? cdata : {category: category}
         cdata[year] = (cdata[year] ? cdata[year] : 0) + item.amount;
@@ -101,4 +103,41 @@ export function filterExpensesByCategories(data, categories) {
             ret.push(item)
     }
     return ret
+}
+
+export function cumulativeYearGroup(data, labels) {
+    let cache = {}
+    let keyLen = labels[0].name.length
+    let ret = []
+    //prefill for each day of year
+    for(let i=1;i<=366/7;i++) {
+        const item = { name: `Week ${i}`}
+        cache[i] = item
+        ret.push(item)
+    }
+
+    //set first date amount = 0
+    for(let lbl of labels) {
+        cache[1][lbl.name] = 0
+        cache[lbl.name] = 1
+    }
+
+    for(let item of data) {
+        const day = moment(item.tran_date).week()
+        const year = item.tran_date.substring(0,keyLen)
+        const prevIdx = cache[year]
+        for(let idx = prevIdx + 1;idx<=day;idx++) {
+            cache[idx][year] = cache[prevIdx][year]
+        }
+        cache[day][year] += item.amount
+        cache[year] = day
+    }
+
+    for(let item of ret) {
+        for(let lbl of labels) {
+            let val = Math.round(item[lbl.name]/100)
+            item[lbl.name] = isNaN(val) ? null : val
+        }
+    }
+    return {data: ret, labels: labels}
 }

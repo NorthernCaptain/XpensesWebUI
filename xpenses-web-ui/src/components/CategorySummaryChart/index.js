@@ -3,8 +3,9 @@
  */
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import {Box, Typography} from "@mui/material";
+import {chartColors, chartPaleColors} from "../../config/colors";
 
 export default function CategorySummaryChart({data}) {
     if(!data) return (
@@ -34,8 +35,16 @@ export default function CategorySummaryChart({data}) {
                     <YAxis tick={{fontSize: 10}} width={30} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey={data.labels[0].name} fill={data.labels[0].color} />
-                    {data.labels[1] && <Bar dataKey={data.labels[1].name} fill={data.labels[1].color} />}
+                    <Bar dataKey={data.labels[0].name} fill={chartColors[0]}>
+                        {data.data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                        ))}
+                    </Bar>
+                    {data.labels[1] && <Bar dataKey={data.labels[1].name} fill={chartPaleColors[0]}>
+                        {data.data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={chartPaleColors[index % chartPaleColors.length]} />
+                        ))}
+                    </Bar>}
                 </BarChart>
             </ResponsiveContainer>
         </>

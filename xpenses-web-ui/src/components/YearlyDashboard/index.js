@@ -8,7 +8,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 import {useExpensesForSummaryQuery} from "../../generated/graphql";
 import {useAuth} from "../../features/auth/authSlice";
-import {groupByMonthYear, groupByTopCategoryAndYear} from "../../utils/dataTransformers";
+import {cumulativeYearGroup, groupByMonthYear, groupByTopCategoryAndYear} from "../../utils/dataTransformers";
 import Grid from "@mui/material/Grid";
 import MonthlySummaryChart from "../MonthlySummaryChart";
 import CategorySummaryChart from "../CategorySummaryChart";
@@ -37,6 +37,7 @@ export function YearlyDashboard(props) {
     const auth = useAuth()
     const [yearData, setYearData] = useState(null)
     const [catData, setCatData] = useState(null)
+    const [cumulativeData, setCumulativeData] = useState(null)
 
     const [firstYear, setFirstYear] = useState({
         val: moment().year().toString(),
@@ -74,6 +75,9 @@ export function YearlyDashboard(props) {
         const categories = groupByTopCategoryAndYear(data, [...labels])
         console.log("Categories", categories)
         setCatData(categories)
+        const cumulative = cumulativeYearGroup(data, [...labels])
+        console.log("Cumulative", cumulative)
+        setCumulativeData(cumulative)
     }
 
     const { data: year1data, loading: year1loading, error: year1error } = useExpensesForSummaryQuery({
@@ -132,7 +136,10 @@ export function YearlyDashboard(props) {
                 <CategorySummaryChart data={catData}/>
             </DashboardCard>
             <DashboardCard xs={12} md={6}>
-                <MonthlySummaryChart data={yearData}/>
+                <MonthlySummaryChart data={yearData} title="Spent Monthly"/>
+            </DashboardCard>
+            <DashboardCard xs={12} md={12}>
+                <MonthlySummaryChart data={cumulativeData} type="line" title="Week over week cumulative"/>
             </DashboardCard>
         </>
     )
