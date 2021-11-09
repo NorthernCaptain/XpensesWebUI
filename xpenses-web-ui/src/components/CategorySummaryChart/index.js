@@ -7,7 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import {Box, Typography} from "@mui/material";
 import {chartColors, chartPaleColors} from "../../config/colors";
 
-export default function CategorySummaryChart({data}) {
+export default function CategorySummaryChart({data, onClick}) {
     if(!data) return (
         <>
             <Typography variant="subtitle2" color="textSecondary" align="center">Spent by Category</Typography>
@@ -35,12 +35,14 @@ export default function CategorySummaryChart({data}) {
                     <YAxis tick={{fontSize: 10}} width={30} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey={data.labels[0].name} fill={chartColors[0]}>
+                    <Bar dataKey={data.labels[0].name} fill={chartColors[0]}
+                         onClick={(data, index)=>{if(onClick) onClick(data, index, data.labels[0].name)}}>
                         {data.data.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
                         ))}
                     </Bar>
-                    {data.labels[1] && <Bar dataKey={data.labels[1].name} fill={chartPaleColors[0]}>
+                    {data.labels[1] && <Bar dataKey={data.labels[1].name} fill={chartPaleColors[0]}
+                                            onClick={(data, index)=>{if(onClick) onClick(data, index, data.labels[1].name)}}>
                         {data.data.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={chartPaleColors[index % chartPaleColors.length]} />
                         ))}

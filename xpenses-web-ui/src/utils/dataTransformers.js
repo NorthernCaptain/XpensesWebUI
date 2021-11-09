@@ -110,7 +110,7 @@ export function cumulativeYearGroup(data, labels) {
     let keyLen = labels[0].name.length
     let ret = []
     //prefill for each day of year
-    for(let i=1;i<=366/7;i++) {
+    for(let i=1;i<=53;i++) {
         const item = { name: `Week ${i}`}
         cache[i] = item
         ret.push(item)
@@ -140,4 +140,35 @@ export function cumulativeYearGroup(data, labels) {
         }
     }
     return {data: ret, labels: labels}
+}
+
+export function groupByDays(data) {
+    let cache = {}
+    for(let item of data) {
+        const day = item.tran_date.substring(0, 10)
+        let cdata = cache[day]
+        if(!cdata) {
+            cdata = {name: day, items: [], amount: 0}
+            cache[day] = cdata
+        }
+        cdata.amount += item.amount
+        cdata.items.push(item)
+    }
+    let ret = []
+    let now = moment()
+    for(let key in cache) {
+        let item = cache[key]
+        let date = moment(item.name)
+        item.date = date
+        item.name = date.year() === now.year() ? date.format("MMM DD, ddd") : date.format("MMM DD, ddd YYYY")
+        item.amount = Math.round(item.amount/100)
+        ret.push(item)
+    }
+
+    ret.sort((a,b) => {
+        if(a.date.isBefore(b.date)) return -1
+        if(a.date.isAfter(b.date)) return 1
+        return 0
+    })
+    return ret
 }

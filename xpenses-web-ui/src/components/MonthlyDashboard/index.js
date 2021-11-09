@@ -3,28 +3,23 @@
  */
 import React, {useEffect, useState} from 'react';
 import {
-    Container,
-    Paper,
-    Box,
-    useTheme,
-    useMediaQuery,
     TextField,
-    FormControl,
-    InputLabel,
-    Select, OutlinedInput, MenuItem, Checkbox, ListItemText
+    Grid,
+    Typography, useTheme, useMediaQuery, Box
 } from "@mui/material";
-import Grid from "@mui/material/Grid"
 import {useAuth} from "../../features/auth/authSlice";
 import moment from "moment";
 import DatePicker from '@mui/lab/DatePicker';
-import {useCategoriesQuery, useExpensesForSummaryLazyQuery, useExpensesForSummaryQuery} from "../../generated/graphql";
-import {filterExpensesByCategories, groupByTopCategoryAndYear} from "../../utils/dataTransformers";
+import {useCategoriesQuery, useExpensesForSummaryLazyQuery} from "../../generated/graphql";
+import {filterExpensesByCategories, groupByDays, groupByTopCategoryAndYear} from "../../utils/dataTransformers";
 import {DashboardCard} from "../DashboardCard";
 import CategorySummaryChart from "../CategorySummaryChart";
+import {ExpenseCard} from "../ExpenseCard";
+import {CategoryFilter} from "../CategoryFilter";
 
 function MonthlyFilter(props) {
     let maxDate = moment().startOf("month")
-    let minDate = moment().subtract(3, "year").startOf("year")
+    let minDate = moment().subtract(5, "year").startOf("year")
     const handleChange = (newDate) => {
         if((newDate.month() !== props.value.month() || newDate.year() !== props.value.year())
             && props.onChange) {
@@ -44,97 +39,17 @@ function MonthlyFilter(props) {
     )
 }
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
-        },
-    },
-};
-
-const ALL = 'ALL'
-
-function CategoryFilter(props) {
-    const items = props.items ? props.items : []
-
-    const handleChange = (event) => {
-        let value = event.target.value
-        let result = []
-        let allIdx = value.find(it=>it===0) !== undefined
-        let wasAll = items.length === props.value.length
-        let isAll = value.length - (allIdx ? 1 : 0) === items.length
-        while(true) {
-            //user unchecked ALL item -> reset all real items
-            if (wasAll && isAll && !allIdx) {
-                //empty result
-                break
-            }
-
-            //user checked ALL item -> select all real items
-            if (!wasAll && allIdx) {
-                result.push(...items)
-                break
-            }
-
-            //individual item set/unset handling
-            for (let item of value) {
-                if (item) result.push(items.find(i => props.getId(i) === item))
-            }
-            break
-        }
-        result.sort((a, b) => props.getName(a).localeCompare(props.getName(b)))
-        if(props.onChange) props.onChange(result)
-    }
-
-    let values = props.value.map(props.getId)
-    if(values.length === items.length) values.push(0)
-    return (
-        <FormControl sx={{ ml: 1, mt:1, width: 270 }}>
-            <InputLabel size="small">Category</InputLabel>
-            <Select
-                multiple
-                value={values}
-                onChange={handleChange}
-                input={<OutlinedInput size="small" label="Category" />}
-                renderValue={(selected) => {
-                    return props.value.length === items.length ? ALL :
-                        selected.map(i =>{
-                    return i ? props.getName(items.find(it=> props.getId(it)===i)) : ALL
-                }).join(', ')}}
-                MenuProps={MenuProps}
-                size="small"
-                sx={{width: 270}}
-            >
-                <MenuItem key='k-all' value={0}>
-                    <Checkbox checked={props.value.length === items.length} />
-                    <ListItemText primary={ALL} />
-                </MenuItem>
-                {items.map(it => {
-                    const id = props.getId(it)
-                    const name = props.getName(it)
-                    return (
-                        <MenuItem key={`cf-mi-key-${id}`} value={id} >
-                            <Checkbox checked={!!props.value.find(i=> props.getId(i) === id)}/>
-                            <ListItemText primary={name}/>
-                        </MenuItem>
-                    )
-                }
-                )}
-            </Select>
-        </FormControl>
-    )
-}
 
 export function MonthlyDashboard(props) {
     const auth = useAuth()
+    const theme = useTheme();
+    const isMedium = useMediaQuery(theme.breakpoints.up('md'));
 
     const [firstMonth, setFirstMonth] = useState(moment().startOf("month"))
     const [categories, setCategories] = useState([])
     const [allCategories, setAllCategories] = useState([])
     const [catData, setCatData] = useState(null)
+    const [expenses, setExpenses] = useState([])
 
     useCategoriesQuery({
         variables: {
@@ -162,6 +77,8 @@ export function MonthlyDashboard(props) {
         const grouped = groupByTopCategoryAndYear(filtered, [{name: firstMonth.format('YYYY-MM'), color: "#8884d8"}])
         console.log("GRP", grouped)
         setCatData(grouped)
+        const dayData = groupByDays(filtered)
+        setExpenses(dayData)
     }
 
     const [refreshExpenses] = useExpensesForSummaryLazyQuery({
@@ -182,15 +99,23 @@ export function MonthlyDashboard(props) {
         })
     }, [firstMonth, categories])
 
+    let expenseSX = isMedium ? {maxHeight: 300, overflowY: "auto" , paddingLeft: "4px", paddingRight: "4px"}
+        : {}
     return (
         <>
             <Grid item xs={12} md={12} sx={{display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap'}} className="monthly-filters">
+                <Typography variant="h7" color="textSecondary" sx={{alignSelf: "center", textAlign: "start", flexGrow: 1}}>Monthly stats</Typography>
                 <MonthlyFilter value={firstMonth} onChange={setFirstMonth}/>
                 <CategoryFilter value={categories} onChange={setCategories} items={allCategories} getId={(it)=>it.id} getName={(it)=>it.name}/>
             </Grid>
             <DashboardCard xs={12} md={8}>
                 <CategorySummaryChart data={catData}/>
             </DashboardCard>
+            <Grid item xs={12} md={4}>
+                <Box sx={expenseSX}>
+                    {expenses.map(it => <ExpenseCard key={`expense-card-${it.name}`} item={it}/>)}
+                </Box>
+            </Grid>
         </>
     )
 }

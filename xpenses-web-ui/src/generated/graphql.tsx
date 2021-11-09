@@ -161,7 +161,7 @@ export type ExpensesForSummaryQueryVariables = Exact<{
 }>;
 
 
-export type ExpensesForSummaryQuery = { __typename?: 'Query', expenses: Array<Maybe<{ __typename?: 'Expense', tran_date?: Maybe<any>, amount: number, category?: Maybe<{ __typename?: 'Category', id: number, name?: Maybe<string>, parent?: Maybe<{ __typename?: 'Category', id: number, name?: Maybe<string> }> }> }>> };
+export type ExpensesForSummaryQuery = { __typename?: 'Query', expenses: Array<Maybe<{ __typename?: 'Expense', tran_date?: Maybe<any>, amount: number, description?: Maybe<string>, category?: Maybe<{ __typename?: 'Category', id: number, name?: Maybe<string>, parent?: Maybe<{ __typename?: 'Category', id: number, name?: Maybe<string> }> }>, user?: Maybe<{ __typename?: 'User', id: number, short_name?: Maybe<string> }> }>> };
 
 export type UserByTokenQueryVariables = Exact<{
   userToken?: Maybe<Scalars['String']>;
@@ -223,6 +223,7 @@ export const ExpensesForSummaryDocument = gql`
   ) {
     tran_date
     amount
+    description
     category {
       id
       parent {
@@ -230,6 +231,10 @@ export const ExpensesForSummaryDocument = gql`
         name
       }
       name
+    }
+    user {
+      id
+      short_name
     }
   }
 }
