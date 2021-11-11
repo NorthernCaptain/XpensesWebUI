@@ -5,7 +5,7 @@ import React, {useEffect, useState} from 'react';
 import {
     TextField,
     Grid,
-    Typography, useTheme, useMediaQuery, Box
+    Typography, useTheme, useMediaQuery, Box, IconButton
 } from "@mui/material";
 import {useAuth} from "../../features/auth/authSlice";
 import moment from "moment";
@@ -16,6 +16,7 @@ import {DashboardCard} from "../DashboardCard";
 import CategorySummaryChart from "../CategorySummaryChart";
 import {ExpenseCard} from "../ExpenseCard";
 import {CategoryFilter} from "../CategoryFilter";
+import {DeleteForeverOutlined} from "@mui/icons-material";
 
 function MonthlyFilter(props) {
     let maxDate = moment().startOf("month")
@@ -50,6 +51,8 @@ export function MonthlyDashboard(props) {
     const [allCategories, setAllCategories] = useState([])
     const [catData, setCatData] = useState(null)
     const [expenses, setExpenses] = useState([])
+    const [catFilter, setCatFilter] = useState(null)
+    const [filteredData, setFilteredData] = useState([])
 
     useCategoriesQuery({
         variables: {
@@ -71,14 +74,12 @@ export function MonthlyDashboard(props) {
     });
 
     const transformData = data => {
-        console.log("GOT DATA", data)
         let filtered = filterExpensesByCategories(data.expenses, categories)
         console.log("FILTERED", filtered)
+        setFilteredData(filtered)
         const grouped = groupByTopCategoryAndYear(filtered, [{name: firstMonth.format('YYYY-MM'), color: "#8884d8"}])
-        console.log("GRP", grouped)
         setCatData(grouped)
-        const dayData = groupByDays(filtered)
-        setExpenses(dayData)
+        setCatFilter(null)
     }
 
     const [refreshExpenses] = useExpensesForSummaryLazyQuery({
@@ -99,20 +100,58 @@ export function MonthlyDashboard(props) {
         })
     }, [firstMonth, categories])
 
+    useEffect(()=>{
+        let inputData = filteredData
+        if(catFilter) {
+            inputData = filteredData.filter(it => it.category.id === catFilter.id || it.category.parent?.id === catFilter.id)
+        }
+        let dayData = groupByDays(inputData)
+        setExpenses(dayData)
+    }, [catFilter, filteredData])
+
+    const handleCategoryClick = (item, index, name) => {
+        console.log("Category clicked", item.category, index, name)
+        setCatFilter(item.category)
+    }
+
     let expenseSX = isMedium ? {maxHeight: 300, overflowY: "auto" , paddingLeft: "4px", paddingRight: "4px"}
         : {}
+
+    let catFilterUI = null
+
+    if(catFilter) {
+        catFilterUI = <Box sx={
+            {
+                display:'flex',
+                justifyContent:'space-between',
+                p: 2,
+                mb: 1,
+                backgroundColor: "lightyellow",
+                borderRadius: 1,
+                borderColor: "orange",
+                borderWidth: "1px",
+                borderStyle: "solid"
+            }}>
+            <Typography variant="body" color="textSecondary" sx={{alignSelf: "center", textAlign: "start", flexGrow: 1}}>Filter: {catFilter.name}</Typography>
+            <IconButton color="secondary" aria-label="clear filter" onClick={()=> setCatFilter(null)}>
+                <DeleteForeverOutlined />
+            </IconButton>
+        </Box>
+    }
+
     return (
         <>
             <Grid item xs={12} md={12} sx={{display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap'}} className="monthly-filters">
-                <Typography variant="h7" color="textSecondary" sx={{alignSelf: "center", textAlign: "start", flexGrow: 1}}>Monthly stats</Typography>
+                <Typography variant="body" color="textSecondary" sx={{alignSelf: "center", textAlign: "start", flexGrow: 1}}>Monthly stats</Typography>
                 <MonthlyFilter value={firstMonth} onChange={setFirstMonth}/>
                 <CategoryFilter value={categories} onChange={setCategories} items={allCategories} getId={(it)=>it.id} getName={(it)=>it.name}/>
             </Grid>
             <DashboardCard xs={12} md={8}>
-                <CategorySummaryChart data={catData}/>
+                <CategorySummaryChart data={catData} onClick={handleCategoryClick}/>
             </DashboardCard>
             <Grid item xs={12} md={4}>
                 <Box sx={expenseSX}>
+                    {catFilterUI}
                     {expenses.map(it => <ExpenseCard key={`expense-card-${it.name}`} item={it}/>)}
                 </Box>
             </Grid>

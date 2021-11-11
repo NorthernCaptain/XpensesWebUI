@@ -11,7 +11,7 @@ export function ExpenseCard({item}) {
             </Box>
             <List>
                 {item.items.map((it, idx) => <>
-                    <ListItem secondaryAction={
+                    <ListItem key={`ex-card-${idx}`} secondaryAction={
                         <Typography variant="body" color="textSecondary" >${Math.round(it.amount/10)/10}</Typography>
                     }>
                         <ListItemAvatar>

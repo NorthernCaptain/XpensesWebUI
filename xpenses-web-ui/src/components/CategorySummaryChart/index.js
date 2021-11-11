@@ -36,13 +36,13 @@ export default function CategorySummaryChart({data, onClick}) {
                     <Tooltip />
                     <Legend />
                     <Bar dataKey={data.labels[0].name} fill={chartColors[0]}
-                         onClick={(data, index)=>{if(onClick) onClick(data, index, data.labels[0].name)}}>
+                         onClick={(item, index)=>{if(onClick) onClick(item, index, data.labels[0].name)}}>
                         {data.data.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
                         ))}
                     </Bar>
                     {data.labels[1] && <Bar dataKey={data.labels[1].name} fill={chartPaleColors[0]}
-                                            onClick={(data, index)=>{if(onClick) onClick(data, index, data.labels[1].name)}}>
+                                            onClick={(item, index)=>{if(onClick) onClick(item, index, data.labels[1].name)}}>
                         {data.data.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={chartPaleColors[index % chartPaleColors.length]} />
                         ))}
