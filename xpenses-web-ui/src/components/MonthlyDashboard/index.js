@@ -5,7 +5,7 @@ import React, {useEffect, useState} from 'react';
 import {
     TextField,
     Grid,
-    Typography, useTheme, useMediaQuery, Box, IconButton
+    Typography, useTheme, useMediaQuery, Box, IconButton, Paper
 } from "@mui/material";
 import {useAuth} from "../../features/auth/authSlice";
 import moment from "moment";
@@ -17,6 +17,7 @@ import CategorySummaryChart from "../CategorySummaryChart";
 import {ExpenseCard} from "../ExpenseCard";
 import {CategoryFilter} from "../CategoryFilter";
 import {DeleteForeverOutlined} from "@mui/icons-material";
+import {yellow} from "@mui/material/colors";
 
 function MonthlyFilter(props) {
     let maxDate = moment().startOf("month")
@@ -120,23 +121,19 @@ export function MonthlyDashboard(props) {
     let catFilterUI = null
 
     if(catFilter) {
-        catFilterUI = <Box sx={
+        catFilterUI = <Paper elevation={4} sx={
             {
                 display:'flex',
                 justifyContent:'space-between',
                 p: 2,
                 mb: 1,
-                backgroundColor: "lightyellow",
-                borderRadius: 1,
-                borderColor: "orange",
-                borderWidth: "1px",
-                borderStyle: "solid"
+                backgroundColor: yellow[50],
             }}>
             <Typography variant="body" color="textSecondary" sx={{alignSelf: "center", textAlign: "start", flexGrow: 1}}>Filter: {catFilter.name}</Typography>
             <IconButton color="secondary" aria-label="clear filter" onClick={()=> setCatFilter(null)}>
                 <DeleteForeverOutlined />
             </IconButton>
-        </Box>
+        </Paper>
     }
 
     return (

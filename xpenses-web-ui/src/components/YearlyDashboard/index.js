@@ -15,25 +15,8 @@ import CategorySummaryChart from "../CategorySummaryChart";
 import {DashboardCard} from "../DashboardCard";
 import Typography from "@mui/material/Typography";
 import {Box, Divider} from "@mui/material";
+import {YearFilter} from "../YearlyFilter";
 
-
-function YearFilter(props) {
-    let curYear = moment().year()
-    return (
-        <ToggleButtonGroup
-            color={props.color}
-            size="small"
-            value={props.value}
-            exclusive
-            onChange={props.onChange}
-            sx={props.sx}
-        >
-            {
-                [curYear-5,curYear-4,curYear-3,curYear-2,curYear-1,curYear].map(year => <ToggleButton key={`ytb-${props.id}-${year}`} value={`${year}`}>{year}</ToggleButton>)
-            }
-        </ToggleButtonGroup>
-    )
-}
 
 function YearSummary({data}) {
     if(!data) return <Typography variant="subtitle2" color="textSecondary" align="center" mb={4}>Total Spent</Typography>

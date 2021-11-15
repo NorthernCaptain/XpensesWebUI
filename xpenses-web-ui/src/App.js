@@ -12,6 +12,7 @@ import AuthorizedRoute from "./components/AuthorizedRoute";
 import Dashboard from "./pages/dashboard";
 import Loading from "./components/Loading";
 import config from "./config";
+import ExpensesPage from "./pages/expenses";
 const SignIn = lazy(() => import("./pages/signin"));
 
 const cache = new InMemoryCache()
@@ -30,6 +31,7 @@ function App() {
                 <Suspense fallback={Loading}>
                     <Route exact path="/sign-in" component={SignIn} />
                     <AuthorizedRoute exact path="/dashboard" component={Dashboard} />
+                    <AuthorizedRoute exact path="/xpenses" component={ExpensesPage} />
                 </Suspense>
             </ApolloProvider>
         </LocalizationProvider>
