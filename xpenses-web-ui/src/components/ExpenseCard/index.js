@@ -4,14 +4,15 @@ import React from "react";
 
 export function ExpenseCard({item}) {
     return (
-        <Paper elevation={4} sx={{p: 2, mb: 1}}>
+        <Paper elevation={4} sx={{p: 2, mb: 1, mt: 1}}>
             <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}} mr={2}>
                 <Typography variant="h6" color="textPrimary" sx={{alignSelf: "center", textAlign: "start", fontWeight: "normal"}}>{item.name}</Typography>
                 <Typography variant="h6" color="textPrimary" sx={{alignSelf: "center", textAlign: "end"}}>${item.amount}</Typography>
             </Box>
             <List>
-                {item.items.map((it, idx) => <>
-                    <ListItem key={`ex-card-${idx}`} secondaryAction={
+                {item.items.map((it, idx) =>
+                    <Box key={`ex-card-${idx}`}>
+                    <ListItem secondaryAction={
                         <Typography variant="body" color="textSecondary" >${Math.round(it.amount/10)/10}</Typography>
                     }>
                         <ListItemAvatar>
@@ -22,8 +23,8 @@ export function ExpenseCard({item}) {
                             secondary={it.description}
                         />
                     </ListItem>
-                    {idx+1 !== item.items.length && <Divider key={`divider-${idx}`} variant="middle" component="li" />}
-                    </>
+                    {idx+1 !== item.items.length && <Divider variant="middle" component="li" />}
+                    </Box>
                 )}
             </List>
         </Paper>
@@ -37,14 +38,15 @@ export function SkeletonExpenseCard({lines = 3}) {
     }
 
     return (
-        <Paper elevation={4} sx={{p: 2, mb: 1}}>
+        <Paper elevation={4} sx={{p: 2, mb: 1, mt: 1}}>
             <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}} mr={2}>
                 <Typography variant="h6" color="textPrimary" sx={{alignSelf: "center", textAlign: "start", fontWeight: "normal", width: "80%"}}><Skeleton/></Typography>
                 <Typography variant="h6" color="textPrimary" sx={{alignSelf: "center", textAlign: "end", width: "10%"}}><Skeleton/></Typography>
             </Box>
             <List>
-                {item.items.map((it, idx) => <>
-                        <ListItem key={`ex-card-${idx}`} secondaryAction={
+                {item.items.map((it, idx) =>
+                    <Box key={`ex-card-${idx}`}>
+                        <ListItem secondaryAction={
                             <Typography variant="body" color="textSecondary" ><Skeleton/></Typography>
                         }>
                             <ListItemAvatar>
@@ -55,8 +57,8 @@ export function SkeletonExpenseCard({lines = 3}) {
                                 secondary={<Skeleton/>}
                             />
                         </ListItem>
-                        {idx+1 !== item.items.length && <Divider key={`divider-${idx}`} variant="middle" component="li" />}
-                    </>
+                        {idx+1 !== item.items.length && <Divider variant="middle" component="li" />}
+                    </Box>
                 )}
             </List>
         </Paper>

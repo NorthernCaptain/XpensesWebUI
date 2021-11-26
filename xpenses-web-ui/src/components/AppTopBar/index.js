@@ -13,6 +13,7 @@ import Menu from '@mui/material/Menu';
 import {useAuth, logout} from "../../features/auth/authSlice";
 import {useDispatch} from "react-redux";
 import Avatar from "../Avatar";
+import {SearchField} from "../Search";
 
 export default function AppTopBar(props) {
     const auth = useAuth()
@@ -49,6 +50,7 @@ export default function AppTopBar(props) {
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: 'start' }}>
                         {props.title}
                     </Typography>
+                    {props.search && <SearchField value={props.search.value} onChange={props.search.onChange}/>}
                     {auth.valid && (
                         <div>
                             <IconButton
