@@ -148,7 +148,7 @@ export default function ExpensesPage(props) {
         onCompleted: transformData
     });
 
-    useEffect(() => {transformData(yeardata)}, [search])
+    useEffect(() => { if(yeardata) transformData(yeardata) }, [search])
 
     console.log("Search value", search, yeardata)
     return (

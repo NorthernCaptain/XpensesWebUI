@@ -47,7 +47,14 @@ export default function AppTopBar(props) {
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: 'start' }}>
+                    <Typography variant="h6" component="div"
+                                sx={{
+                                    flexGrow: 1,
+                                    textAlign: 'start',
+                                    textOverflow: 'ellipsis',
+                                    overflow: 'hidden',
+                                    whiteSpace: 'nowrap'
+                                }}>
                         {props.title}
                     </Typography>
                     {props.search && <SearchField value={props.search.value} onChange={props.search.onChange}/>}
