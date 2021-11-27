@@ -11,7 +11,7 @@ export function DashboardCard(props) {
     const paperP = isMedium ? 2 : 1
 
     return (
-        <Grid item xs={props.xs} md={props.md}>
+        <Grid item xs={props.xs} md={props.md} mb={props.mb}>
             <Paper elevation={4} sx={{p: paperP, height: isMedium ? 300 : 220 }}>
                 {props.children}
             </Paper>

@@ -144,6 +144,7 @@ export function cumulativeYearGroup(data, labels) {
 
 export function groupByDays(data) {
     let cache = {}
+    let monthCache = {}
     for(let item of data) {
         const day = item.tran_date.substring(0, 10)
         let cdata = cache[day]
@@ -153,7 +154,16 @@ export function groupByDays(data) {
         }
         cdata.amount += item.amount
         cdata.items.push(item)
+        const month = item.tran_date.substring(0, 7)
+        let mdata = monthCache[month]
+        if(!mdata) {
+            let date = moment(day).startOf('month')
+            mdata = {name: date.format("MMMM YY"), amount: 0, date: date}
+            monthCache[month] = mdata
+        }
+        mdata.amount += item.amount
     }
+
     let ret = []
     let now = moment()
     for(let key in cache) {
@@ -165,10 +175,16 @@ export function groupByDays(data) {
         ret.push(item)
     }
 
+    for(let key in monthCache) {
+        let item = monthCache[key]
+        item.amount = Math.round(item.amount/100)
+        ret.push(item)
+    }
+
     ret.sort((a,b) => {
         if(a.date.isBefore(b.date)) return -1
         if(a.date.isAfter(b.date)) return 1
-        return 0
+        return a.items && !b.items ? 1 : (b.items && !a.items ? -1 : 0)
     })
     return ret
 }

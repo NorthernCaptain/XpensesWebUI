@@ -17,7 +17,8 @@ import CategorySummaryChart from "../CategorySummaryChart";
 import {ExpenseCard} from "../ExpenseCard";
 import {CategoryFilter} from "../CategoryFilter";
 import {DeleteForeverOutlined} from "@mui/icons-material";
-import {yellow} from "@mui/material/colors";
+import {blue, yellow} from "@mui/material/colors";
+import {ExpenseMonthSummary} from "../ExpenseMonthSummary";
 
 function MonthlyFilter(props) {
     let maxDate = moment().startOf("month")
@@ -39,6 +40,22 @@ function MonthlyFilter(props) {
             renderInput={(params) => <TextField {...params} helperText={null} size="small" sx={{mt: 1, width: 270 }}/>}
         />
     )
+}
+
+function FilterCard({name, onClick}) {
+    return <Paper elevation={0} sx={
+        {
+            display:'flex',
+            justifyContent:'space-between',
+            p: 2,
+            mb: 1,
+            backgroundColor: blue[50],
+        }}>
+        <Typography variant="body" color="textSecondary" sx={{alignSelf: "center", textAlign: "start", flexGrow: 1}}>Filter: {name}</Typography>
+        <IconButton color="primary" aria-label="clear filter" onClick={onClick}>
+            <DeleteForeverOutlined />
+        </IconButton>
+    </Paper>
 }
 
 
@@ -118,24 +135,6 @@ export function MonthlyDashboard(props) {
     let expenseSX = isMedium ? {maxHeight: 300, overflowY: "auto" , paddingLeft: "4px", paddingRight: "4px"}
         : {}
 
-    let catFilterUI = null
-
-    if(catFilter) {
-        catFilterUI = <Paper elevation={4} sx={
-            {
-                display:'flex',
-                justifyContent:'space-between',
-                p: 2,
-                mb: 1,
-                backgroundColor: yellow[50],
-            }}>
-            <Typography variant="body" color="textSecondary" sx={{alignSelf: "center", textAlign: "start", flexGrow: 1}}>Filter: {catFilter.name}</Typography>
-            <IconButton color="secondary" aria-label="clear filter" onClick={()=> setCatFilter(null)}>
-                <DeleteForeverOutlined />
-            </IconButton>
-        </Paper>
-    }
-
     return (
         <>
             <Grid item xs={12} md={12} sx={{display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap'}} className="monthly-filters">
@@ -148,8 +147,9 @@ export function MonthlyDashboard(props) {
             </DashboardCard>
             <Grid item xs={12} md={4}>
                 <Box sx={expenseSX}>
-                    {catFilterUI}
-                    {expenses.map(it => <ExpenseCard key={`expense-card-${it.name}`} item={it}/>)}
+                    {catFilter && <FilterCard name={catFilter.name} onClick={setCatFilter(null)}/>}
+                    {expenses.map(it => it.items ? <ExpenseCard key={`expense-card-${it.name}`} item={it}/>
+                        : <ExpenseMonthSummary key={`expense-sum-${it.name}`} item={it}/>)}
                 </Box>
             </Grid>
         </>
