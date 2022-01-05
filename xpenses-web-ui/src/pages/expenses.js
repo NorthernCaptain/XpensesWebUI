@@ -8,11 +8,11 @@ import moment from "moment";
 import {useAuth} from "../features/auth/authSlice";
 import {useExpensesForSummaryQuery} from "../generated/graphql";
 import {groupByDays, groupByMonthYear, groupByTopCategoryAndYear} from "../utils/dataTransformers";
-import {ExpenseCard, SkeletonExpenseCard} from "../components/ExpenseCard";
-import {ExpenseMonthSummary} from "../components/ExpenseMonthSummary";
 import {DashboardCard} from "../components/DashboardCard";
 import MonthlySummaryChart from "../components/MonthlySummaryChart";
 import CategorySummaryChart from "../components/CategorySummaryChart";
+import {ExpenseCardList} from "../components/ExpenseCardList";
+import {TotalSummaryCard} from "../components/TotalSummaryCard";
 
 /**
  * Dim out top or bottom edge of the outer container
@@ -35,42 +35,6 @@ function DimOut({isTop, show}) {
     return <Box sx={sx}/>
 }
 
-/**
- * List of expenses or skeleton cards if not loaded
- * @param data
- * @param isMedium
- * @return {JSX.Element}
- * @constructor
- */
-function CardList({data, isMedium, isLoading}) {
-    let expenseSX = isMedium ?
-        {
-            maxHeight: "calc(100vh - 138px)",
-            overflowY: "auto" ,
-            paddingLeft: "4px",
-            paddingRight: "4px"
-        } : {}
-
-    if (isLoading) {
-        return <Grid item xs={12} md={8}>
-            <Box sx={expenseSX}>
-                { [2,3,2,2].map((it, idx) =>
-                    <SkeletonExpenseCard key={`skeleton-card-${idx}`} lines={it}/>) }
-            </Box>
-        </Grid>
-    }
-
-    if (!data) return null;
-
-    return <Grid item xs={12} md={8} sx={{position: "relative"}}>
-        <Box sx={expenseSX}>
-            {data.map(it => it.items ? <ExpenseCard key={`expense-card-${it.name}`} item={it}/>
-                : <ExpenseMonthSummary key={`expense-sum-${it.name}`} item={it}/>)}
-        </Box>
-        <DimOut isTop={true} show={isMedium}/>
-        <DimOut isTop={false} show={isMedium}/>
-    </Grid>
-}
 
 /**
  * Expenses header with year filter
@@ -83,7 +47,7 @@ function HeaderBar({filter, onChange}) {
     return <Grid item xs={12} md={12} sx={{display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap'}}>
         <Typography variant="body" color="textSecondary"
                     sx={{alignSelf: "center", textAlign: "start", flexGrow: 1}}
-        >Expenses for Year</Typography>
+        >Expenses for the year</Typography>
         <YearFilter
             id="first_year"
             color="cc1"
@@ -91,6 +55,20 @@ function HeaderBar({filter, onChange}) {
             onChange={onChange}
         />
     </Grid>
+}
+
+/**
+ * Calc total amount from the months data
+ * @param monthData
+ * @param year
+ * @return {number}
+ */
+function getTotalAmount(monthData, year) {
+    let total = 0
+    for(let month of monthData.data) {
+        total += month[year.val] ? month[year.val] : 0
+    }
+    return total
 }
 
 /**
@@ -112,7 +90,11 @@ export default function ExpensesPage(props) {
     })
     let [data, setData] = useState(null)
     let [byMonth, setByMonth] = useState(null)
+    let [allByMonth, setAllByMonth] = useState(null)
+    let [totalAmount, setTotalAmount] = useState(0)
+    let [filterAmount, setFilterAmount] = useState(0)
     let [byCategory, setByCategory] = useState(null)
+    let [version, setVersion] = useState(0)
 
     const handleYear = (event, newYear) => {
         setYear({
@@ -121,6 +103,8 @@ export default function ExpensesPage(props) {
             dateTo: moment.utc(`${newYear}-01-01`).add(1, 'year')
         })
         setData(null)
+        setTotalAmount(0)
+        setFilterAmount(0)
     }
 
     const [search, setSearch] = useState("")
@@ -131,17 +115,30 @@ export default function ExpensesPage(props) {
      */
     const transformData = (yeardata) => {
         let rawData = yeardata.expenses
+        let monthLabels = [{name: year.val, color: theme.palette.cc1.main}]
         if(search) {
-            rawData = rawData.filter(it=> it.description.includes(search)
-                || it.category.name.includes(search)
-                || it.category.parent?.name.includes(search))
+            let src = search.toLowerCase()
+            rawData = rawData.filter(it=> it.description.toLowerCase().includes(src)
+                || it.category.name.toLowerCase().includes(src)
+                || it.category.parent?.name.toLowerCase().includes(src))
+            monthLabels = [{name: year.val, color: theme.palette.primary.main}]
         }
         let data = groupByDays(rawData)
-        let monthData = groupByMonthYear(rawData, [{name: year.val, color: "#82ca9d"}])
+        let monthData = groupByMonthYear(rawData, monthLabels)
         setByMonth(monthData)
-        let categoryData = groupByTopCategoryAndYear(rawData, [{name: year.val, color: "#82ca9d"}])
+        setFilterAmount(getTotalAmount(monthData, year))
+        let categoryData = groupByTopCategoryAndYear(rawData, [{name: year.val, color: theme.palette.cc1.main}])
         setByCategory(categoryData)
         setData(data)
+        setVersion(version+1)
+    }
+
+    const onDataLoaded = (data) => {
+        let rawData = data.expenses
+        let monthData = groupByMonthYear(rawData, [{name: year.val, color: theme.palette.cc1.main}])
+        setTotalAmount(getTotalAmount(monthData, year))
+        setAllByMonth(monthData)
+        transformData(data)
     }
 
     /**
@@ -155,7 +152,7 @@ export default function ExpensesPage(props) {
             type: -1 //expenses only, ignore the income
         },
         skip: !year.val,
-        onCompleted: transformData
+        onCompleted: onDataLoaded
     });
 
     useEffect(() => { if(yeardata) transformData(yeardata) }, [search])
@@ -167,6 +164,14 @@ export default function ExpensesPage(props) {
                 <Grid container spacing={2}>
                     <HeaderBar filter={year.val} onChange={handleYear}/>
                     <Grid item xs={12} md={4}>
+                        <DashboardCard xs={12} md={12} mb={2} h={search ? 160 : 120}>
+                            <TotalSummaryCard
+                                year={year.val}
+                                totalAmount={totalAmount}
+                                filter={search}
+                                filterAmount={filterAmount}
+                                theme={theme}/>
+                        </DashboardCard>
                         <DashboardCard xs={12} md={12} mb={2}>
                             <MonthlySummaryChart data={byMonth} title="Spent Monthly"/>
                         </DashboardCard>
@@ -174,7 +179,7 @@ export default function ExpensesPage(props) {
                             <CategorySummaryChart data={byCategory}/>
                         </DashboardCard>
                     </Grid>
-                    <CardList data={data} isMedium={isMedium} isLoading={!data}/>
+                    <ExpenseCardList data={data} isMedium={isMedium} isLoading={!data} version={version}/>
                 </Grid>
             </Container>
         </Box>

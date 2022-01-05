@@ -4,7 +4,7 @@ import React from "react";
 
 export function ExpenseCard({item}) {
     return (
-        <Paper elevation={4} sx={{p: 2, mb: 1, mt: 1}}>
+        <Paper elevation={4} sx={{p: 2, ml: 1, mr:1, mb:2}}>
             <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}} mr={2}>
                 <Typography variant="h6" color="textPrimary" sx={{alignSelf: "center", textAlign: "start", fontWeight: "normal"}}>{item.name}</Typography>
                 <Typography variant="h6" color="textPrimary" sx={{alignSelf: "center", textAlign: "end"}}>${item.amount}</Typography>
@@ -38,7 +38,7 @@ export function SkeletonExpenseCard({lines = 3}) {
     }
 
     return (
-        <Paper elevation={4} sx={{p: 2, mb: 1, mt: 1}}>
+        <Paper elevation={4} sx={{p: 2, ml: 1, mr: 1, mb:2}}>
             <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}} mr={2}>
                 <Typography variant="h6" color="textPrimary" sx={{alignSelf: "center", textAlign: "start", fontWeight: "normal", width: "80%"}}><Skeleton/></Typography>
                 <Typography variant="h6" color="textPrimary" sx={{alignSelf: "center", textAlign: "end", width: "10%"}}><Skeleton/></Typography>
